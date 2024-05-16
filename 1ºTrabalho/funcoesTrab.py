@@ -217,7 +217,7 @@ def intervaloConfianca(lista, nivelConfianca):
         print("Nível de confiança inválido!!")
         return intervalo
     
-    if quantElementos > 30:
+    if quantElementos >= 30:
         y = (s * z) / (quantElementos ** (1/2))
         resultadoL = x - y
         resultadoR = x + y
@@ -231,59 +231,99 @@ def intervaloConfianca(lista, nivelConfianca):
         resultadoR = x + y
         intervalo = (round(resultadoL, 3), round(resultadoR, 3))
     
-    return intervalo
+    return intervalo    
 
-def testeMediaZero(amostraA, amostraB, nivelConfianca): # Definir como descobrir se as amostras são pareadas
-    tamA = len(amostraA)
-    tamB = len(amostraB)
-    
-    xA = mediaAmostral(amostraA)
-    print("xA: ", xA)
-    xB = mediaAmostral(amostraB)
-    print("xB: ", xB)
-    difMedAmostral = xA - xB
-    print("difMedAmostral: ", difMedAmostral)
+def testeMediaZero(amostra, nivelConfianca):
+    intervalo = intervaloConfianca(amostra, nivelConfianca)
+    if(intervalo[0] <= 0):
+        print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança inclui zero" .format(intervalo))
+        return 1
+    else:
+        print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança não inclui zero" .format(intervalo))
+        return -1
 
+def desvPadDifMedia(amostraA, amostraB):
     sA = desvioPadrao(amostraA)
-    print("sA: ", sA)
+    nA = len(amostraA)
     sB = desvioPadrao(amostraB)
-    print("sB: ", sB)
+    nB = len(amostraB)
 
-    aux1 = (sA ** 2 / tamA) + (sB ** 2 / tamB)
-    print("aux1: ", aux1)
+    valFim = (sA ** 2 / nA) + (sB ** 2 / nB)
+    valFim = math.sqrt(valFim)
 
-    desvPadDifAmostras = math.sqrt(aux1)
-    print("desvPadDifAmostras: ", desvPadDifAmostras)
+    return valFim
 
-    aux2 = (1 / (tamA + 1)) * ((sA ** 2 / tamA) ** 2)
-    print("aux2: ", aux2)
 
-    aux3 = (1 / (tamB + 1)) * ((sB ** 2 / tamB) ** 2)
-    print("aux3: ", aux3)
+def calcGrausLiberdade(amostraA, amostraB):
+    sA = desvioPadrao(amostraA)
+    nA = len(amostraA)
+    sB = desvioPadrao(amostraB)
+    nB = len(amostraB)
+
+    aux1 = (sA ** 2 / nA) + (sB ** 2 / nB)
+
+    aux2 = (1 / (nA + 1)) * ((sA ** 2 / nA) ** 2)
+
+    aux3 = (1 / (nB + 1)) * ((sB ** 2 / nB) ** 2)
 
     numGrausLib = (aux1 ** 2) / (aux2 + aux3)
     numGrausLib = numGrausLib - 2
-    print("numGrausLib sem ceil: ", numGrausLib)
-    numGrausLib = math.ceil(numGrausLib)
-    print("numGrausLib com ceil: ", numGrausLib)
 
-    alpha = nivelConfianca * 0.01
-    valor_t = t.ppf(alpha, numGrausLib)
-    print("valor_t: ", valor_t)
+    return numGrausLib
 
-    val = desvPadDifAmostras * valor_t
-    print("val: ", val)
+def intervaloConfiancaDifMedias(amostraA, amostraB, nivelConfianca, valDesvPadDifMed, grausLiberdade):
+    xA = mediaAmostral(amostraA)
+    xB = mediaAmostral(amostraB)
+    difMedAmostral = xA - xB
 
+    if nivelConfianca == 90:
+        param = 0.95
+    elif nivelConfianca == 95:
+        param = 0.975
+    elif nivelConfianca == 99:
+        param = 0.995
+
+    valor_t = t.ppf(param, grausLiberdade)
+
+    val = valDesvPadDifMed * valor_t
     valFim1 = difMedAmostral - val
-    print("valFim1: ", valFim1)
-
     valFim2 = difMedAmostral + val
-    print("valFim2: ", valFim2)
 
-    intervalo = (valFim1, valFim2)
+    intervalo = (round(valFim1, 3), round(valFim2, 3))
 
     return intervalo
 
+def testeMediaZeroDuasAmostras(amostraA, amostraB, nivelConfianca, pareadas): # Valor de 'pareadas' pode ser 1 ou -1. 1 = amostras pareadas | -1 = amostras não pareadas
+    tamA = len(amostraA)
+    tamB = len(amostraB)
+
+    if(pareadas == 1): # Amostras são pareadas se o i-ésimo teste em A corresponde ao i-ésimo teste em B. As amostras são tratadas como uma
+        listaDif = []
+
+        for i in range(tamA):
+            listaDif.append(amostraA[i] - amostraB[i])
+
+        if(testeMediaZero(listaDif, nivelConfianca) == 1):
+            print("Os sistemas NÃO SÃO diferentes!")
+            return 1
+        else:
+            print("Os sistemas SÃO diferentes!")
+            return -1
+
+    elif(pareadas == -1):
+        valDesvPadDifMed = desvPadDifMedia(amostraA, amostraB)
+
+        numGrausLib = calcGrausLiberdade(amostraA, amostraB)
+        #numGrausLib = math.ceil(calcGrausLiberdade(amostraA, amostraB))
+
+        intervalo = intervaloConfiancaDifMedias(amostraA, amostraB, nivelConfianca, valDesvPadDifMed, numGrausLib)
+
+        if(intervalo[0] <= 0):
+            print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança inclui zero" .format(intervalo))
+            return 1
+        else:
+            print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança não inclui zero" .format(intervalo))
+            return -1
 
 amostra1= [145, 74, 56, 98, 32, 97]
 
@@ -319,10 +359,20 @@ amostra6 = [1, 8, 10, 6, 2, 3, 6, 7, 10, 2, 3, 5, 5, 5, 8, 9, 10, 1, 1, 1, 2, 3,
 amostraA = [5.4, 16.6, 0.6, 1.4, 0.6, 7.3]
 amostraB = [19.1, 3.5, 3.4, 2.5, 3.6, 1.7]
 
-testeConfiancaA99 = intervaloConfianca(amostraA, 99)
-print(testeConfiancaA99)
+amostraC = [1.5, 2.6, -1.8, 1.3, -0.5, 1.7, 2.4]
 
-#testeMZAeB90 = testeMediaZero(amostraA, amostraB, 90)
+amostraD = [5.36, 16.57, 0.62, 1.41, 0.64, 7.26]
+amostraE = [19.12, 3.52, 3.38, 2.50, 3.60, 1.74]
+
+#testeConfianca99 = intervaloConfianca(amostraC, 99)
+#print(testeConfiancaA99)
+
+#testeMediaZero99 = testeMediaZero(amostraC, 99)
+
+#testeMZAeB90 = testeMediaZeroDuasAmostras(amostraA, amostraB, 90, 1)
+
+testeMZAeB90 = testeMediaZeroDuasAmostras(amostraD, amostraE, 90, -1)
+
 #testeMZAeB95 = testeMediaZero(amostraA, amostraB, 95)
 #testeMZAeB99 = testeMediaZero(amostraA, amostraB, 99)
 
