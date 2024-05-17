@@ -17,18 +17,18 @@ def mediaPonderada(lista):
         soma = soma + lista[i][0] * lista[i][1]
         peso = peso + lista[i][1]
 
-    media = soma/peso
+    media = soma / peso
     valFim = round(media, 3)
 
     return valFim
 
-def media_aritmetica(lista):
+def mediaAritmetica(lista):
     quantElementos = len(lista)
     total = 0
     for i in range(quantElementos):
         total = total + lista[i]
 
-    media = total/quantElementos
+    media = total / quantElementos
     valFim = round(media, 3)
 
     return valFim
@@ -39,12 +39,12 @@ def mediana(lista):
     ordenaValores(lista)
 
     if(quantElementos%2==0):
-        pos = (quantElementos//2)-1
+        pos = (quantElementos // 2)-1
         valor = lista[pos]
-        valor = valor + lista[quantElementos//2]
+        valor = valor + lista[quantElementos // 2]
         valor = valor // 2
     else:
-        valor = lista[quantElementos//2]
+        valor = lista[quantElementos // 2]
     return valor
 
 def mediaGeometrica(lista):
@@ -53,7 +53,7 @@ def mediaGeometrica(lista):
 
     for i in range(quantElementos):
         valor = valor * lista[i]
-    raiz = valor ** (1/quantElementos)
+    raiz = valor ** (1 / quantElementos)
 
     valFim = round(raiz, 3)
 
@@ -64,9 +64,9 @@ def mediaHarmonica(lista):
     valor = 0
 
     for i in range(quantElementos):
-        valor = valor + (1/lista[i])
+        valor = valor + (1 / lista[i])
     
-    return round(quantElementos/valor, 3)
+    return round(quantElementos / valor, 3)
 
 def mediaTaxa(lista):
     quantElementos = len(lista)
@@ -77,10 +77,10 @@ def mediaTaxa(lista):
         soma1 = soma1 + lista[i][0]
         soma2 = soma2 + lista[i][1]
 
-    media1 = soma1/quantElementos
-    media2 = soma2/quantElementos
+    media1 = soma1 / quantElementos
+    media2 = soma2 / quantElementos
 
-    valFim = media2/media1
+    valFim = media2 / media1
     valFim = round(valFim, 3)
 
     return valFim
@@ -100,7 +100,7 @@ def calculaModa(lista):
     
     return modas
 
-def menorvalor(lista):
+def menorValor(lista):
     menor = lista[0]
     i = 1
 
@@ -109,7 +109,7 @@ def menorvalor(lista):
             menor = lista[i]
     return menor
 
-def maiorvalor(lista):
+def maiorValor(lista):
     maior = lista[0]
     i = 1
 
@@ -119,8 +119,8 @@ def maiorvalor(lista):
     return maior
 
 def amplitude(lista):
-    menor = menorvalor(lista)
-    maior = maiorvalor(lista)
+    menor = menorValor(lista)
+    maior = maiorValor(lista)
 
     return maior - menor
 
@@ -131,12 +131,12 @@ def mediaAmostral(lista):
 
     for i in range(quantElementos):
         soma = soma + lista[i]
-    resultado = (1/quantElementos) * soma
+    resultado = (1 / quantElementos) * soma
 
     return round(resultado, 3)
 
 def produtoNotavel(a, b):
-    resultado = (a*2) - (2*a*b) + (b*2)
+    resultado = (a * 2) - (2 * a * b) + (b * 2)
 
     return resultado
 
@@ -166,7 +166,7 @@ def coeficenteVariacao(lista):
     x = mediaAmostral(lista)
     s = desvioPadrao(lista)
 
-    cv = (s/x)*100
+    cv = (s / x) * 100
 
     return round(cv, 3)
 
@@ -179,7 +179,7 @@ def amplitudeInterQuartil(lista):
     Q1 = np.percentile(lista, 25)
     Q3 = np.percentile(lista, 75)
 
-    return round(Q3-Q1, 3)
+    return round(Q3 - Q1, 3)
 
 def diagramaCaixa(amostra):
     plt.boxplot(amostra)
@@ -236,10 +236,10 @@ def intervaloConfianca(lista, nivelConfianca):
 def testeMediaZero(amostra, nivelConfianca):
     intervalo = intervaloConfianca(amostra, nivelConfianca)
     if(intervalo[0] <= 0):
-        print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança inclui zero" .format(intervalo))
+        print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança inclui zero." .format(intervalo))
         return 1
     else:
-        print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança não inclui zero" .format(intervalo))
+        print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança não inclui zero." .format(intervalo))
         return -1
 
 def desvPadDifMedia(amostraA, amostraB):
@@ -276,12 +276,17 @@ def intervaloConfiancaDifMedias(amostraA, amostraB, nivelConfianca, valDesvPadDi
     xB = mediaAmostral(amostraB)
     difMedAmostral = xA - xB
 
+    intervalo = []
+
     if nivelConfianca == 90:
         param = 0.95
     elif nivelConfianca == 95:
         param = 0.975
     elif nivelConfianca == 99:
         param = 0.995
+    else:
+        print("Nível de confiança inválido!!")
+        return intervalo
 
     valor_t = t.ppf(param, grausLiberdade)
 
@@ -319,11 +324,84 @@ def testeMediaZeroDuasAmostras(amostraA, amostraB, nivelConfianca, pareadas): # 
         intervalo = intervaloConfiancaDifMedias(amostraA, amostraB, nivelConfianca, valDesvPadDifMed, numGrausLib)
 
         if(intervalo[0] <= 0):
-            print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança inclui zero" .format(intervalo))
+            print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança inclui zero, logo, os sistemas NÃO SÃO diferentes." .format(intervalo))
             return 1
         else:
-            print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança não inclui zero" .format(intervalo))
+            print("Intervalo de confiança da amostra -> {}\nIntervalo de confiança não inclui zero, logo, os sistemas SÃO diferentes." .format(intervalo))
             return -1
+        
+def larguraInterConfianca(amostra, nivelConfianca):
+    tam = len(amostra)
+    s = desvioPadrao(amostra)
+    h = -1
+
+    if nivelConfianca == 90:
+        z = 1.645
+        param = 0.95
+    elif nivelConfianca == 95:
+        z = 1.960
+        param = 0.975
+    elif nivelConfianca == 99:
+        z = 2.576
+        param = 0.995
+    else:
+        print("Nível de confiança inválido!!")
+        return h
+    
+    if(tam >= 30):
+        h = (2 * s * z) / math.sqrt(tam)
+        return h
+    else:
+        h = (2 * s * (t.ppf(param, tam - 1))) / math.sqrt(tam)
+        return h
+
+def tamAmostraComPrecisaoRequerida(medAmostra, desvPad, nivelConfianca, precisaoRequerida):
+    tamanho = -1
+
+    if nivelConfianca == 90:
+        z = 1.645
+    elif nivelConfianca == 95:
+        z = 1.960
+    elif nivelConfianca == 99:
+        z = 2.576
+    else:
+        print("Nível de confiança inválido!!")
+        return tamanho
+
+    tamanho = ((100 * z * desvPad) / (precisaoRequerida * medAmostra)) ** 2
+
+    return round(tamanho, 3)
+
+"""def tamAmostra(desvPad, nivelConfianca, larguraInterConf, nMaiorIgualTrinta): # nMaiorIgualTrinta pode assumir dois valores: 1 significa n >= 30 | -1 corresponde a n < 30
+    val = -1
+    
+    if nivelConfianca == 90:
+        z = 1.645
+        param = 0.95
+    elif nivelConfianca == 95:
+        z = 1.960
+        param = 0.975
+    elif nivelConfianca == 99:
+        z = 2.576
+        param = 0.995
+    else:
+        print("Nível de confiança inválido!!")
+        return val
+    
+    if(nMaiorIgualTrinta == 1):
+        val = (desvPad * z) ** 2
+        val = 4 * val
+        val = val / larguraInterConf ** 2
+
+        return val
+    
+    else:
+        val = (desvPad * (t.ppf(param, tam - 1))) ** 2
+        val = 4 * val
+        val = val / h ** 2
+
+        return val
+"""
 
 amostra1= [145, 74, 56, 98, 32, 97]
 
@@ -371,7 +449,14 @@ amostraE = [19.12, 3.52, 3.38, 2.50, 3.60, 1.74]
 
 #testeMZAeB90 = testeMediaZeroDuasAmostras(amostraA, amostraB, 90, 1)
 
-testeMZAeB90 = testeMediaZeroDuasAmostras(amostraD, amostraE, 90, -1)
+#testeMZAeB90 = testeMediaZeroDuasAmostras(amostraD, amostraE, 90, -1)
+
+amostra7 = [1, 8, 10, 6, 2, 3, 6, 7, 10, 2, 3, 5, 5, 5, 8, 9, 10, 1, 1, 1, 2, 3, 8, 7, 6, 4, 10, 7, 7, 2, 3, 6, 1, 4, 1, 5, 2, 6, 2]
+#tamanhoAmostra3 = tamAmostra(amostra4, 90)
+#print(tamanhoAmostra3)
+
+tamanhoAmostra = tamAmostraComPrecisaoRequerida(20, 5, 95, 5)
+print(tamanhoAmostra)
 
 #testeMZAeB95 = testeMediaZero(amostraA, amostraB, 95)
 #testeMZAeB99 = testeMediaZero(amostraA, amostraB, 99)
